@@ -5,6 +5,12 @@
 </p>
 
 <p align="center">
+	<a href="https://github.com/Webisso/laravel-multishare/releases">
+		<img src="https://img.shields.io/github/v/release/Webisso/laravel-multishare?display_name=tag" alt="Latest Release">
+	</a>
+	<a href="https://multishare.webisso.net" target="_blank">
+		<img src="https://img.shields.io/badge/Live-multishare.webisso.net-0F172A?logo=googlechrome&logoColor=white" alt="Live Demo">
+	</a>
 	<img src="https://img.shields.io/badge/PHP-8.3%2B-777BB4?logo=php&logoColor=white" alt="PHP 8.3+">
 	<img src="https://img.shields.io/badge/Laravel-13.x-FF2D20?logo=laravel&logoColor=white" alt="Laravel 13">
 	<img src="https://img.shields.io/badge/React-19-61DAFB?logo=react&logoColor=111827" alt="React 19">
@@ -16,7 +22,9 @@
 
 ## Overview
 
-MultiShare is a Laravel + React application for publishing temporary public share pages.
+MultiShare is a polished open-source sharing platform for publishing temporary public links for text, images, video, audio, and general files.
+
+Live URL: https://multishare.webisso.net
 
 It supports five share types:
 
