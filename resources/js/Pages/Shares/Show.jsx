@@ -71,6 +71,12 @@ export default function Show({ share }) {
                                         Create another share
                                     </Link>
                                     <a
+                                        href={route('shares.download', share.public_id)}
+                                        className="inline-flex items-center justify-center rounded-full bg-sky-600 px-5 py-3 text-sm font-bold text-white transition hover:bg-sky-500"
+                                    >
+                                        Download file
+                                    </a>
+                                    <a
                                         href={share.storage_url}
                                         target="_blank"
                                         rel="noreferrer"
@@ -108,6 +114,12 @@ export default function Show({ share }) {
 
                             {share.is_text ? (
                                 <div className="mt-6 flex flex-col gap-3">
+                                    <a
+                                        href={route('shares.download', share.public_id)}
+                                        className="inline-flex items-center justify-center rounded-full bg-sky-600 px-5 py-3 text-sm font-bold text-white transition hover:bg-sky-500"
+                                    >
+                                        Download text
+                                    </a>
                                     <Link
                                         href={route('shares.index', { type: share.share_kind })}
                                         className="inline-flex items-center justify-center rounded-full border border-slate-200 bg-slate-50 px-5 py-3 text-sm font-semibold text-slate-700 transition hover:border-sky-300 hover:text-sky-800"

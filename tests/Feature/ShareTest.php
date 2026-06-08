@@ -54,6 +54,24 @@ class ShareTest extends TestCase
         $this->assertLessThanOrEqual(10000, mb_strlen($share->text_content));
     }
 
+    public function test_text_share_can_be_downloaded_as_a_text_file(): void
+    {
+        $share = Share::create([
+            'public_id' => '01JXTEXTDOWNLOAD00000000000',
+            'share_kind' => Share::TYPE_TEXT,
+            'title' => 'Meeting Notes',
+            'text_content' => "line one\nline two",
+            'expires_at' => now()->addHour(),
+        ]);
+
+        $response = $this->get(route('shares.download', $share));
+
+        $response->assertOk();
+        $response->assertHeader('content-type', 'text/plain; charset=UTF-8');
+        $response->assertHeader('content-disposition', 'attachment; filename=meeting-notes.txt');
+        $response->assertStreamedContent("line one\nline two");
+    }
+
     public function test_file_share_must_be_under_ten_megabytes(): void
     {
         Storage::fake('s3');
@@ -118,6 +136,31 @@ class ShareTest extends TestCase
         $this->assertNotNull($share->storage_path);
         $this->assertSame('https://example.test/bucket/'.ltrim($share->storage_path, '/'), $share->storage_url);
         $this->assertTrue($share->expires_at->between(now()->addMinutes(45)->subMinute(), now()->addMinutes(45)->addMinute()));
+    }
+
+    public function test_file_share_can_be_downloaded_from_storage(): void
+    {
+        Storage::fake('s3');
+        config()->set('filesystems.share', 's3');
+
+        Storage::disk('s3')->put('shares/demo/report.pdf', 'pdf-content');
+
+        $share = Share::create([
+            'public_id' => '01JXFILEDOWNLOAD00000000000',
+            'share_kind' => Share::TYPE_FILE,
+            'storage_disk' => 's3',
+            'storage_path' => 'shares/demo/report.pdf',
+            'storage_url' => 'https://example.test/report.pdf',
+            'original_name' => 'report.pdf',
+            'mime_type' => 'application/pdf',
+            'size' => 11,
+            'expires_at' => now()->addHour(),
+        ]);
+
+        $response = $this->get(route('shares.download', $share));
+
+        $response->assertOk();
+        $response->assertHeader('content-disposition', 'attachment; filename=report.pdf');
     }
 
     public function test_expired_file_shares_are_removed_from_storage_and_database(): void

@@ -1,0 +1,36 @@
+name: Deploy
+on:
+  push:
+    branches:
+      - main
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Install OpenVPN
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y openvpn
+
+      - name: Create VPN config file
+        run: echo "${{ secrets.OPENVPN_CONFIG }}" > vpnconfig.ovpn
+
+      - name: Connect to VPN
+        run: |
+          sudo openvpn --config vpnconfig.ovpn --daemon
+          sleep 15
+
+      - name: Check Public IP (for VPN verification)
+        run: curl ifconfig.me
+
+      - name: Deploy to server
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.HOST }}
+          username: ${{ secrets.USERNAME }}
+          port: 22
+          key: ${{ secrets.SSHKEY }}
+          script: "cd /var/www/webisso/laravel-multishare && sudo git pull origin main && export COMPOSER_ALLOW_SUPERUSER=1 && sudo composer install --optimize-autoloader && sudo php artisan migrate --force && sudo npm install && sudo npm run build && sudo php artisan optimize"

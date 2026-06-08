@@ -11,6 +11,7 @@ Route::get('/', fn () => Inertia::render('Home', [
 ]))->name('home');
 Route::get('/create', [ShareController::class, 'index'])->name('shares.index');
 Route::post('/shares', [ShareController::class, 'store'])->name('shares.store');
+Route::get('/shares/{share}/download', [ShareController::class, 'download'])->name('shares.download');
 Route::get('/shares/{share}', [ShareController::class, 'show'])->name('shares.show');
 Route::get('/legal', fn () => Inertia::render('Legal'))->name('legal');
 

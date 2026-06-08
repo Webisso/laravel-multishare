@@ -12,6 +12,7 @@ use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Inertia\Inertia;
 use Inertia\Response;
+use Symfony\Component\HttpFoundation\Response as HttpResponse;
 
 class ShareController extends Controller
 {
@@ -95,6 +96,30 @@ class ShareController extends Controller
         return Inertia::render('Shares/Show', [
             'share' => $this->transformShare($share, true),
         ]);
+    }
+
+    public function download(Share $share): HttpResponse
+    {
+        abort_if($share->expires_at && $share->expires_at->isPast(), 404);
+
+        if ($share->isTextShare()) {
+            $fileName = $this->textDownloadFileName($share);
+
+            return response()->streamDownload(function () use ($share): void {
+                echo $share->text_content ?? '';
+            }, $fileName, [
+                'Content-Type' => 'text/plain; charset=UTF-8',
+            ]);
+        }
+
+        $disk = $share->storage_disk ?: (string) config('filesystems.share', 's3');
+
+        abort_unless($share->storage_path, 404);
+
+        return Storage::disk($disk)->download(
+            $share->storage_path,
+            $share->original_name ?: basename($share->storage_path)
+        );
     }
 
     protected function transformShare(Share $share, bool $includeContent): array
@@ -188,5 +213,14 @@ class ShareController extends Controller
         }
 
         return Storage::disk($disk)->url($path);
+    }
+
+    protected function textDownloadFileName(Share $share): string
+    {
+        $baseName = $share->title
+            ? Str::slug($share->title)
+            : 'share-'.$share->public_id;
+
+        return ($baseName !== '' ? $baseName : 'share-'.$share->public_id).'.txt';
     }
 }
